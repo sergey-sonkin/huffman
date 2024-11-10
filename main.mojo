@@ -31,11 +31,8 @@ struct Node:
 
 fn add_nodes(owned n1: Node, owned n2: Node) -> Node:
     n = Node(count=n1.count + n2.count, char=n1.char + n2.char)
-    n.left = UnsafePointer[Node].address_of(n1)
-    n.right = UnsafePointer[Node].address_of(n2)
-    print(n.__str__())
-    print(n.left[].__str__())
-    print(n.right[].__str__())
+    n.left.init_pointee_move(n1^)
+    n.right.init_pointee_move(n2^)
     return n
 
 
