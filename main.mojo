@@ -46,11 +46,23 @@ fn add_nodes(owned n1: Node, owned n2: Node) -> Node:
 # TODO: Surely there's something better than casting back and forth
 fn len_binary(x: UInt8) -> UInt8:
     float_x = x.cast[DType.float16]()
+    if x == 0:
+        return 0
     if x > 64 and x % 2 != 0:
         ret = math.floor(math.log2(float_x)) + 2
     else:
         ret = math.floor(math.log2(float_x)) + 1
     return ret.cast[DType.uint8]()
+
+
+fn to_binary_string(number: UInt64, bits: Int = 32) -> String:
+    var binary_str: String = ""
+    for i in range(bits - 1, -1, -1):
+        if (number & (1 << i)) != 0:
+            binary_str += "1"
+        else:
+            binary_str += "0"
+    return binary_str
 
 
 fn huffman[input: String]() -> UInt64:
@@ -110,14 +122,28 @@ fn huffman[input: String]() -> UInt64:
         current_node = current_node.grouped_chars[]
     char_mapping[current_node.char] = value + 1
 
-    var ret: UInt64 = 0b0
+    var ret: UInt64 = 0b01
     ## Step 5: Encoding the message
     for char in input:
         binary_mapping = char_mapping.get(char, 0)
-        padding_length = min(len_binary(binary_mapping), 1)
-        ret = ret.__lshift__(padding_length.cast[DType.uint64]())
+        padding_length = max(len_binary(binary_mapping), 1).cast[DType.uint64]()
+        ret.__ilshift__(padding_length)
         ret += binary_mapping.cast[DType.uint64]()
-        print("Mapping", binary_mapping, "Ret:", ret)
+        print(
+            "Value:",
+            char,
+            "Mapping0",
+            to_binary_string(binary_mapping.cast[DType.uint64]()),
+            "Calculated length",
+            len_binary(binary_mapping),
+            "Padding",
+            padding_length,
+        )
+        print("Mapping", binary_mapping, "Ret:", ret, to_binary_string(ret))
+
+    # ## Step 6: Encode the
+    # ## Step 6: Decoding the message
+    # for char in ret:
 
     return ret
 
