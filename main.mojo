@@ -120,7 +120,7 @@ fn huffman[input: String]() -> UInt64:
         char_mapping[current_node.individual_char[].char] = value
         value = (value + 1) << 1
         current_node = current_node.grouped_chars[]
-    char_mapping[current_node.char] = value + 1
+    char_mapping[current_node.char] = value >> 1
 
     var ret: UInt64 = 0b01
     ## Step 5: Encoding the message
@@ -132,7 +132,7 @@ fn huffman[input: String]() -> UInt64:
         print(
             "Value:",
             char,
-            "Mapping0",
+            "Mapping",
             to_binary_string(binary_mapping.cast[DType.uint64]()),
             "Calculated length",
             len_binary(binary_mapping),
