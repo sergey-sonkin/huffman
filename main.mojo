@@ -1,4 +1,5 @@
 import heapq
+import math
 from collections import Counter, Optional, Dict
 from collections.counter import CountTuple
 from memory.unsafe_pointer import UnsafePointer
@@ -42,7 +43,17 @@ fn add_nodes(owned n1: Node, owned n2: Node) -> Node:
     return n
 
 
-fn huffman[input: String]() -> UInt8:
+# TODO: Surely there's something better than casting back and forth
+fn len_binary(x: UInt8) -> UInt8:
+    float_x = x.cast[DType.float16]()
+    if x > 64 and x % 2 != 0:
+        ret = math.floor(math.log2(float_x)) + 2
+    else:
+        ret = math.floor(math.log2(float_x)) + 1
+    return ret.cast[DType.uint8]()
+
+
+fn huffman[input: String]() -> UInt64:
     alias l = len(input)
 
     @parameter
@@ -89,26 +100,32 @@ fn huffman[input: String]() -> UInt8:
 
     root_node = counts_element_list[0]
 
-    print("we made it here")
     # Step 4: Create mapping
     var char_mapping = Dict[String, UInt8]()
     var current_node = root_node
     var value: UInt8 = 0b0
     while current_node.has_next():
-        current_char = current_node.individual_char[].char
         char_mapping[current_node.individual_char[].char] = value
-        print(current_char, value)
         value = (value + 1) << 1
         current_node = current_node.grouped_chars[]
-    # Last node: Manually create left and right
     char_mapping[current_node.char] = value + 1
-    print(char_mapping.__str__())
-    return 0
+
+    var ret: UInt64 = 0b0
+    ## Step 5: Encoding the message
+    for char in input:
+        binary_mapping = char_mapping.get(char, 0)
+        padding_length = min(len_binary(binary_mapping), 1)
+        ret = ret.__lshift__(padding_length.cast[DType.uint64]())
+        ret += binary_mapping.cast[DType.uint64]()
+        print("Mapping", binary_mapping, "Ret:", ret)
+
+    return ret
 
 
 fn main():
     alias input: String = "ABRACADABRA"
 
-    inp = huffman[input]()
+    hoffman_encoding = huffman[input]()
+    print(hoffman_encoding)
     print("made it to the end of main")
     return
