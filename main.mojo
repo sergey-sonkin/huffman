@@ -37,6 +37,32 @@ struct Node:
         return len(self.char) != 1
 
 
+struct BitString:
+    var data: List[UInt8]
+    var bit_size: UInt8
+
+    fn __init__(inout self):
+        self.data = List[UInt8]()
+        self.bit_size = 0
+
+    fn push_back(inout self, bit: Bool):
+        if self.bit_size % 8 == 0:
+            self.data.append(0)
+        if bit:
+            var index = int(self.bit_size / 8)
+            self.data[index] |= 1 << (self.bit_size % 8)
+        self.bit_size += 1
+
+    fn get(self, index: Int) -> Optional[SIMD[DType.uint8, 1]]:
+        if index >= int(self.bit_size):
+            return None
+        var byte_index = int(index / 8)
+        var bit_offset = int(index % 8)
+        var res = self.data[byte_index] & (1 << bit_offset)
+        var ret = (res != 0)
+        return ret.cast[DType.uint8]()
+
+
 fn add_nodes(owned n1: Node, owned n2: Node) -> Node:
     n = Node(count=n1.count + n2.count, char=n1.char + n2.char)
     n.grouped_chars.init_pointee_move(n1^)
@@ -144,7 +170,6 @@ fn huffman[input: String]() -> UInt64:
         )
         print("Mapping", binary_mapping, "Ret:", ret, to_binary_string(ret))
 
-    # ## Step 6: Encode the
     # ## Step 6: Decoding the message
     # for char in ret:
 
