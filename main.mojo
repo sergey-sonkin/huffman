@@ -1,3 +1,4 @@
+import bit
 import heapq
 import math
 from collections import Counter, Optional, Dict
@@ -123,10 +124,12 @@ fn huffman[input: String]() -> UInt64:
     char_mapping[current_node.char] = value >> 1
 
     var ret: UInt64 = 0b01
-    ## Step 5: Encoding the message
+    # Step 5: Encoding the message
     for char in input:
         binary_mapping = char_mapping.get(char, 0)
-        padding_length = max(len_binary(binary_mapping), 1).cast[DType.uint64]()
+        padding_length = max(bit.bit_width(binary_mapping), 1).cast[
+            DType.uint64
+        ]()
         ret.__ilshift__(padding_length)
         ret += binary_mapping.cast[DType.uint64]()
         print(
