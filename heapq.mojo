@@ -45,7 +45,6 @@ if smallest:    # optional
 """
 
 from collections import Optional
-from algorithm.swap import swap
 
 
 trait Comparable:
