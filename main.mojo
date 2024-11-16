@@ -1,4 +1,5 @@
 import bit
+import bitstring
 import heapq
 import math
 from collections import Counter, Optional, Dict
@@ -10,10 +11,11 @@ alias debug = True
 
 @value
 struct Node:
-    var count: UInt32
     var char: String
     var grouped_chars: UnsafePointer[Node]  # Can this be a Reference[Node]?
     var individual_char: UnsafePointer[Node]
+    var count: UInt32
+    var is_root: UInt32
 
     fn __init__(
         inout self,
@@ -24,6 +26,7 @@ struct Node:
         self.char = char
         self.grouped_chars = UnsafePointer[Node].alloc(1)
         self.individual_char = UnsafePointer[Node].alloc(1)
+        self.is_root = True
 
     fn __str__(inout self) -> String:
         var test: String = "Node count: {}, node value: {}."
@@ -32,41 +35,22 @@ struct Node:
         except:
             return "Failed to print node"
 
+    fn __lt__(self, other: Self) -> Bool:
+        return self.count < other.count
+
+    fn __gt__(self, other: Self) -> Bool:
+        return self.count > other.count
+
     fn has_next(self) -> Bool:
         # We seemingly can't rely on unsafe pointer being unallocated. self.x.__as_bool__ seems to always return True
-        return len(self.char) != 1
-
-
-struct BitString:
-    var data: List[UInt8]
-    var bit_size: UInt8
-
-    fn __init__(inout self):
-        self.data = List[UInt8]()
-        self.bit_size = 0
-
-    fn push_back(inout self, bit: Bool):
-        if self.bit_size % 8 == 0:
-            self.data.append(0)
-        if bit:
-            var index = int(self.bit_size / 8)
-            self.data[index] |= 1 << (self.bit_size % 8)
-        self.bit_size += 1
-
-    fn get(self, index: Int) -> Optional[SIMD[DType.uint8, 1]]:
-        if index >= int(self.bit_size):
-            return None
-        var byte_index = int(index / 8)
-        var bit_offset = int(index % 8)
-        var res = self.data[byte_index] & (1 << bit_offset)
-        var ret = (res != 0)
-        return ret.cast[DType.uint8]()
+        return not self.is_root
 
 
 fn add_nodes(owned n1: Node, owned n2: Node) -> Node:
     n = Node(count=n1.count + n2.count, char=n1.char + n2.char)
     n.grouped_chars.init_pointee_move(n1^)
     n.individual_char.init_pointee_move(n2^)
+    n.is_root = False
     return n
 
 
@@ -92,14 +76,17 @@ fn to_binary_string(number: UInt64, bits: Int = 32) -> String:
     return binary_str
 
 
-fn huffman[input: String]() -> UInt64:
+@always_inline
+fn parse_input_to_node[
+    input: String
+]() -> Node:  # TODO: Refactor to reference. We hate copies!
     alias l = len(input)
 
     @parameter
     if l == 0:
-        return 0
+        return Node(count=0, char="")
     elif l == 1:
-        return 1
+        return Node(count=1, char=input[0])
 
     # Step 1: Convert string to list of char and get the counts
     input_char_list = List[String]()
@@ -109,10 +96,9 @@ fn huffman[input: String]() -> UInt64:
     var counts = Counter(input_char_list)
     var num_counts = len(counts)
 
-    if num_counts == 0:
-        return 0
+    # If we just repeat all of the strings, just one node!
     if num_counts == 1:
-        return ord(str(input)[0])
+        return Node(count=l, char=input[0])
 
     var counts_list = counts.most_common(num_counts)
     counts_list.reverse()
@@ -127,17 +113,23 @@ fn huffman[input: String]() -> UInt64:
         counts_element_list.insert(value=new_node, i=ii)
         ii += 1
 
+    heapq.heapify[Node](counts_element_list)
+
     # Step 3: Combine nodes to form tree with root node
     # This is likely where the intel paper makes huge advancments
     while (
         len(counts_element_list) > 1
     ):  # Could replace while statement with subtraction to not keep checking len!
-        var n1 = counts_element_list.pop(0)
-        var n2 = counts_element_list.pop(0)
+        var n1 = heapq.heappop(counts_element_list).value()
+        var n2 = heapq.heappop(counts_element_list).value()
         var new = add_nodes(n1^, n2^)
-        counts_element_list.insert(0, new)
+        heapq.heappush(counts_element_list, new)
 
-    root_node = counts_element_list[0]
+    return counts_element_list[0]
+
+
+fn huffman[input: String]() -> UInt64:
+    root_node = parse_input_to_node[input]()
 
     # Step 4: Create mapping
     var char_mapping = Dict[String, UInt8]()
@@ -179,6 +171,7 @@ fn huffman[input: String]() -> UInt64:
 fn main():
     alias input: String = "ABRACADABRA"
 
+    var t = parse_input_to_node[input]()
     hoffman_encoding = huffman[input]()
     print(hoffman_encoding)
     print("made it to the end of main")
