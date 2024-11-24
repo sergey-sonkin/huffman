@@ -71,6 +71,16 @@ struct BitString:
         var ret = (res != 0)
         return ret.cast[DType.uint8]()
 
+    # TODO: SIMD this guy up
+    fn __iadd__(inout self, other: Self) raises:
+        if len(other.data) > 1:
+            raise Error("Adding BitStrings with multiple uint8s unsupported")
+        var d = other.data[0]
+        for ii in range(other.bit_size):
+            to_push_back = bool(int(d) >> (7 - ii))
+            self.push_back(to_push_back)
+        return None
+
     # TODO: Make this more performant
     fn __str__(self) -> String:
         if not self.data:

@@ -18,7 +18,21 @@ fn test_bitstring_legacy() raises:
     assert_equal(string.__str__(), "00001011, ")
 
 
+fn test_iadd() raises:
+    s1 = bitstring.BitString()
+    s1.push_back(0)
+
+    s2 = bitstring.BitString()
+    s2.push_back(1)
+    s2.push_back(1)
+
+    assert_equal(s1.__str__(), "0")
+    s1.__iadd__(s2)
+    assert_equal(s1.__str__(), "011")
+
+
 fn main() raises:
+    test_iadd()
     string = bitstring.BitString()
     assert_equal(string.__str__(), "")
 
