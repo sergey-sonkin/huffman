@@ -45,6 +45,26 @@ struct Node:
         # We seemingly can't rely on unsafe pointer being unallocated. self.x.__as_bool__ seems to always return True
         return not self.is_root
 
+    fn print_tree(
+        self, indent: String = "", extra_pedantic: Bool = False
+    ) raises:
+        var s: String = "{}Node(char='{}', count={})"
+        s = s.format(indent, self.char, self.count)
+        print(s)
+
+        if not self.is_root:
+            var sleft: String = "{}  Left:"
+            sleft = sleft.format(indent)
+            if extra_pedantic:
+                print(sleft)
+            self.individual_char[].print_tree(indent + "    ", extra_pedantic)
+
+            var sright: String = "{}  Right:"
+            sright = sright.format(indent)
+            if extra_pedantic:
+                print(sright)
+            self.grouped_chars[].print_tree(indent + "    ", extra_pedantic)
+
 
 fn add_nodes(owned n1: Node, owned n2: Node) -> Node:
     n = Node(count=n1.count + n2.count, char=n1.char + n2.char)
@@ -131,14 +151,22 @@ fn parse_input_to_node[
 @always_inline
 fn create_mapping(root_node: Node) -> Dict[String, BitString]:
     var char_mapping_2 = Dict[String, BitString]()
-    var current_node_2 = root_node
-    var value_2: UInt8 = 0b0
-    var nodes_to_parse = List[Node](root_node)
-    while nodes_to_parse:
-        current_node_2 = nodes_to_parse.pop()
-        char_mapping_2[current_node_2.char] = BitString(value_2)
-        value_2 = (value_2 + 1) << 1
-    char_mapping_2[current_node_2.char] = value_2 >> 1
+    var nodes_to_parse_2 = List[Node](root_node)
+    var previous_encoding_list = List[BitString](BitString())
+
+    while nodes_to_parse_2:
+        current_node_2 = nodes_to_parse_2.pop()
+        var previous_encoding = previous_encoding_list.pop()
+
+        if current_node_2.is_root:
+            print(current_node_2.__str__(), previous_encoding.__str__())
+            char_mapping_2[current_node_2.char] = previous_encoding
+        else:
+            nodes_to_parse_2.append(current_node_2.individual_char[])
+            nodes_to_parse_2.append(current_node_2.grouped_chars[])
+            previous_encoding_list.append(previous_encoding.push_backc(1))
+            previous_encoding_list.append(previous_encoding.push_backc(0))
+
     return char_mapping_2
 
 
