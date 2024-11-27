@@ -128,27 +128,23 @@ fn parse_input_to_node[
     return counts_element_list[0]
 
 
-fn huffman[input: String]() -> UInt64:
-    root_node = parse_input_to_node[input]()
-
-    # Step 4: Create mapping
+@always_inline
+fn create_mapping(root_node: Node) -> Dict[String, BitString]:
     var char_mapping_2 = Dict[String, BitString]()
     var current_node_2 = root_node
-    var value_2 = BitString()
+    var value_2: UInt8 = 0b0
     var nodes_to_parse = List[Node](root_node)
     while nodes_to_parse:
         current_node_2 = nodes_to_parse.pop()
-        char_mapping_2[current_node_2.char] = value_2
+        char_mapping_2[current_node_2.char] = BitString(value_2)
+        value_2 = (value_2 + 1) << 1
+    char_mapping_2[current_node_2.char] = value_2 >> 1
+    return char_mapping_2
 
-    # Step 4: Create mapping
-    var char_mapping = Dict[String, UInt8]()
-    var current_node = root_node
-    var value: UInt8 = 0b0
-    while current_node.has_next():
-        char_mapping[current_node.individual_char[].char] = value
-        value = (value + 1) << 1
-        current_node = current_node.grouped_chars[]
-    char_mapping[current_node.char] = value >> 1
+
+fn huffman[input: String]() -> UInt64:
+    root_node = parse_input_to_node[input]()
+    mapping = create_mapping(root_node)
 
     var ret: UInt64 = 0b01
     # Step 5: Encoding the message
