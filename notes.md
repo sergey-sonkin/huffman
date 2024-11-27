@@ -34,11 +34,4 @@ Later concatenate: Takes up more memory for large corpus of text
 
 Ultimately we will need to try both approaches to understand which is faster.
 
-Notes: From exploring further, I'm not sure there is an elegant way to perform SIMD mapping.
-
-For context, this is what the code might look like:
-
-Hi Tiffany. I ask that you don't. Please just let me know 
-Hi Tiffany. We are going our separate ways and I do not want to communicate further. I ask that you do not text or call me outside of letting me know when you will leave the apartment and once you have done so.
-
-Tiffany I understand this is a really hard time, but we've broken up and we are going our separate ways. I ask that we limit our communication going forward. Please only contact me (via text) to let me know when you plan to leave the apartment and once you have done so.
+Notes: From exploring further, I'm not sure there is an elegant way to perform SIMD mapping. Doesn't seem like the intrinsic is supported in Mojo.
