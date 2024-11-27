@@ -53,6 +53,12 @@ struct BitString:
         self.data = List[UInt8]()
         self.bit_size = 0
 
+    fn __init__(inout self, uint: UInt8):
+        var width = bit.bit_width(uint)
+        var res = uint << (8 - width)
+        self.data = List[UInt8](res)
+        self.bit_size = width or 1
+
     fn __copyinit__(inout self, other: Self):
         self.bit_size = other.bit_size
         self.data = other.data

@@ -55,6 +55,25 @@ fn test_push_back() raises:
     assert_equal(string.__str__(), "11011101")
 
 
+fn test_init_fromint() raises:
+    # s1 = bitstring.BitString(0)
+    # assert_equal(s1.__str__(), "0")
+    # assert_equal(s1.bit_size, 1)
+
+    s2 = bitstring.BitString(1)
+    assert_equal(s2.__str__(), "1")
+    assert_equal(s2.bit_size, 1)
+
+    s3 = bitstring.BitString(2)
+    assert_equal(s3.__str__(), "10")
+    assert_equal(s3.bit_size, 2)
+
+    s4 = bitstring.BitString(0b11111111)
+    assert_equal(s4.__str__(), "11111111")
+    assert_equal(s4.bit_size, 8)
+
+
 fn main() raises:
     test_push_back()
     test_iadd()
+    test_init_fromint()
