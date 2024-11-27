@@ -73,7 +73,20 @@ fn test_init_fromint() raises:
     assert_equal(s4.bit_size, 8)
 
 
+fn test_push_backc() raises:
+    string = bitstring.BitString()
+    assert_equal(string.__str__(), "")
+
+    string.push_back(1)
+    assert_equal(string.__str__(), "1")
+
+    string2 = string.push_backc(1)
+    assert_equal(string.__str__(), "1")
+    assert_equal(string2.__str__(), "11")
+
+
 fn main() raises:
     test_push_back()
+    test_push_backc()
     test_iadd()
     test_init_fromint()
