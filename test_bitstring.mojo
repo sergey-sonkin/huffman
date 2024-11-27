@@ -56,9 +56,9 @@ fn test_push_back() raises:
 
 
 fn test_init_fromint() raises:
-    # s1 = bitstring.BitString(0)
-    # assert_equal(s1.__str__(), "0")
-    # assert_equal(s1.bit_size, 1)
+    s1 = bitstring.BitString(0)
+    assert_equal(s1.__str__(), "0")
+    assert_equal(s1.bit_size, 1)
 
     s2 = bitstring.BitString(1)
     assert_equal(s2.__str__(), "1")
