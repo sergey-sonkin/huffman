@@ -1,5 +1,5 @@
 import bit
-import bitstring
+from bitstring import BitString
 import heapq
 import math
 from collections import Counter, Optional, Dict
@@ -130,6 +130,15 @@ fn parse_input_to_node[
 
 fn huffman[input: String]() -> UInt64:
     root_node = parse_input_to_node[input]()
+
+    # Step 4: Create mapping
+    var char_mapping_2 = Dict[String, BitString]()
+    var current_node_2 = root_node
+    var value_2 = BitString()
+    var nodes_to_parse = List[Node](root_node)
+    while nodes_to_parse:
+        current_node_2 = nodes_to_parse.pop()
+        char_mapping_2[current_node_2.char] = value_2
 
     # Step 4: Create mapping
     var char_mapping = Dict[String, UInt8]()
