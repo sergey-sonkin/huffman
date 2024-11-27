@@ -15,7 +15,7 @@ struct Node:
     var grouped_chars: UnsafePointer[Node]  # Can this be a Reference[Node]?
     var individual_char: UnsafePointer[Node]
     var count: UInt32
-    var is_root: UInt32
+    var is_root: Bool
 
     fn __init__(
         inout self,
