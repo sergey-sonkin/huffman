@@ -31,8 +31,7 @@ fn test_iadd() raises:
     assert_equal(s1.__str__(), "011")
 
 
-fn main() raises:
-    test_iadd()
+fn test_push_back() raises:
     string = bitstring.BitString()
     assert_equal(string.__str__(), "")
 
@@ -55,15 +54,7 @@ fn main() raises:
     string.push_back(1)
     assert_equal(string.__str__(), "11011101")
 
-    # # another 4
-    # string2.push_back(1)
-    # print(string2.__str__())
-    # string2.push_back(1)
-    # print(string2.__str__())
-    # string2.push_back(0)
-    # print(string2.__str__())
-    # string2.push_back(1)
-    # print(string2.__str__())
 
-    # y = string2.data.__str__()
-    # print(y)
+fn main() raises:
+    test_push_back()
+    test_iadd()
