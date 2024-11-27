@@ -59,10 +59,6 @@ struct BitString:
         self.data = List[UInt8](res)
         self.bit_size = width or 1
 
-    fn __copy__(inout self, other: Self):
-        self.bit_size = other.bit_size
-        self.data = other.data
-
     fn __copyinit__(inout self, other: Self):
         self.bit_size = other.bit_size
         self.data = other.data
@@ -82,13 +78,7 @@ struct BitString:
 
     fn push_backc(inout self, bit: Bool) -> BitString:
         var self_copy = self
-        if self_copy.bit_size % 8 == 0:
-            self_copy.data.append(0)
-        var index = int(self_copy.bit_size / 8)
-        var bit_position = 7 - (self_copy.bit_size % 8)  # Start from the MSB
-        if bit:
-            self_copy.data[index] |= 1 << bit_position
-        self_copy.bit_size += 1
+        self_copy.push_back(bit)
         return self_copy
 
     fn get(self, index: Int) -> Optional[SIMD[DType.uint8, 1]]:
