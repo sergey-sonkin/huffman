@@ -1,6 +1,6 @@
 import bit
 from bitstring import BitString
-import heapq
+import imports.heapq
 import math
 from collections import Counter, Optional, Dict
 from collections.counter import CountTuple

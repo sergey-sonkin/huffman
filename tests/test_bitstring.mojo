@@ -85,7 +85,7 @@ fn test_push_backc() raises:
     assert_equal(string2.__str__(), "11")
 
 
-fn main() raises:
+fn run_bitstring_tests() raises:
     test_push_back()
     test_push_backc()
     test_iadd()

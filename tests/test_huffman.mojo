@@ -11,5 +11,5 @@ fn test_create_mapping() raises:
         print((item[].value).__str__())
 
 
-fn main() raises:
+fn run_huffman_tests() raises:
     test_create_mapping()
