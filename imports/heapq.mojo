@@ -25,7 +25,7 @@
 """Defines the heapq functionalities, which mimic the Python module.
 
 ```mojo
-import heapq
+import imports.heapq
 
 var heap = List[Int](3, 2, 1)
 heapq.heapify(heap)
