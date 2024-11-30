@@ -85,8 +85,23 @@ fn test_push_backc() raises:
     assert_equal(string2.__str__(), "11")
 
 
+fn test_push_back_uint() raises:
+    string = bitstring.BitString()
+    string.push_back(1)
+    assert_equal(string.__str__(), "1")
+    string.push_back_uint(0b10)
+    assert_equal(string.__str__(), "110")
+    string.push_back_uint(0b0)
+    assert_equal(string.__str__(), "1100")
+    string.push_back_uint(0b0100)
+    assert_equal(string.__str__(), "1100100")
+    string.push_back_uint(0b1000)
+    assert_equal(string.__str__(), "11001001000")
+
+
 fn run_bitstring_tests() raises:
     test_push_back()
     test_push_backc()
     test_iadd()
     test_init_fromint()
+    test_push_back_uint()

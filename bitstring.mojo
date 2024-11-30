@@ -76,6 +76,13 @@ struct BitString:
             self.data[index] |= 1 << bit_position
         self.bit_size += 1
 
+    fn push_back_uint(inout self, uint: UInt8) raises:
+        var width = bit.bit_width(uint) or 1
+        for i in range(width):
+            var bit = (uint & (1 << (width - 1 - i))) != 0
+            self.push_back(bit)
+        return None
+
     fn push_backc(inout self, bit: Bool) -> BitString:
         var self_copy = self
         self_copy.push_back(bit)
