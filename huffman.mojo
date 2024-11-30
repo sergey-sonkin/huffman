@@ -52,18 +52,20 @@ struct Node:
         s = s.format(indent, self.char, self.count)
         print(s)
 
-        if not self.is_root:
-            var sleft: String = "{}  Left:"
-            sleft = sleft.format(indent)
-            if extra_pedantic:
-                print(sleft)
-            self.individual_char[].print_tree(indent + "    ", extra_pedantic)
+        if self.is_root:
+            return
 
-            var sright: String = "{}  Right:"
-            sright = sright.format(indent)
-            if extra_pedantic:
-                print(sright)
-            self.grouped_chars[].print_tree(indent + "    ", extra_pedantic)
+        var sleft: String = "{}  Left:"
+        sleft = sleft.format(indent)
+        if extra_pedantic:
+            print(sleft)
+        self.individual_char[].print_tree(indent + "    ", extra_pedantic)
+
+        var sright: String = "{}  Right:"
+        sright = sright.format(indent)
+        if extra_pedantic:
+            print(sright)
+        self.grouped_chars[].print_tree(indent + "    ", extra_pedantic)
 
 
 fn add_nodes(owned n1: Node, owned n2: Node) -> Node:
@@ -170,42 +172,32 @@ fn create_mapping(root_node: Node) -> Dict[String, BitString]:
     return char_mapping_2
 
 
-fn huffman[input: String]() -> UInt64:
-    root_node = parse_input_to_node[input]()
-    mapping = create_mapping(root_node)
-
-    var ret: UInt64 = 0b01
-    # Step 5: Encoding the message
+fn encode[input: String](mapping: Dict[String, BitString]) raises -> BitString:
+    var ret = BitString()
     for char in input:
-        binary_mapping = char_mapping.get(char, 0)
-        padding_length = max(bit.bit_width(binary_mapping), 1).cast[
-            DType.uint64
-        ]()
-        ret.__ilshift__(padding_length)
-        ret += binary_mapping.cast[DType.uint64]()
-        print(
-            "Value:",
-            char,
-            "Mapping",
-            to_binary_string(binary_mapping.cast[DType.uint64]()),
-            "Calculated length",
-            len_binary(binary_mapping),
-            "Padding",
-            padding_length,
-        )
-        print("Mapping", binary_mapping, "Ret:", ret, to_binary_string(ret))
-
-    # ## Step 6: Decoding the message
-    # for char in ret:
-
+        ret += mapping[char]
     return ret
 
 
-fn main():
+fn encode_huffman_tree(mapping: Dict[String, BitString]) raises -> BitString:
+    var ret = BitString()
+    for item in mapping.items():
+        string = item[].key
+        ret += BitString(ord(string))
+    return ret
+
+
+fn huffman[input: String]() raises -> BitString:
+    root_node = parse_input_to_node[input]()
+    mapping = create_mapping(root_node)
+    encoding = encode[input](mapping)
+    return encoding
+
+
+fn main() raises:
     alias input: String = "ABRACADABRA"
 
-    var t = parse_input_to_node[input]()
     hoffman_encoding = huffman[input]()
-    print(hoffman_encoding)
+    print(str(hoffman_encoding))
     print("made it to the end of main")
     return
