@@ -1,5 +1,6 @@
 import bitstring
 from testing import assert_equal
+from collections import Dict
 
 
 fn test_bitstring_legacy() raises:
@@ -99,9 +100,28 @@ fn test_push_back_uint() raises:
     assert_equal(string.__str__(), "11001001000")
 
 
+# Unit tests
+fn test_encode_decode_huffman_tree() raises:
+    var mapping = Dict[String, bitstring.BitString]()
+    mapping["A"] = bitstring.BitString()
+    mapping["A"].push_back_uint(0b101)
+    mapping["B"] = bitstring.BitString()
+    mapping["B"].push_back_uint(0b11)
+    mapping["C"] = bitstring.BitString()
+    mapping["C"].push_back_uint(0b0)
+
+    var encoded = bitstring.encode_huffman_tree(mapping)
+    var decoded = bitstring.decode_huffman_tree(encoded)
+
+    assert_equal(decoded["A"].__str__(), mapping["A"].__str__())
+    assert_equal(decoded["B"].__str__(), mapping["B"].__str__())
+    assert_equal(decoded["C"].__str__(), mapping["C"].__str__())
+
+
 fn run_bitstring_tests() raises:
     test_push_back()
     test_push_backc()
     test_iadd()
     test_init_fromint()
     test_push_back_uint()
+    test_encode_decode_huffman_tree()

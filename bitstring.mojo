@@ -1,5 +1,5 @@
 import bit
-from collections import Optional
+from collections import Optional, Dict
 
 
 fn to_binary_string(number: UInt8, bits: Int = 8) -> String:
@@ -47,7 +47,7 @@ struct BitStringLegacy:
 
 struct BitString:
     var data: List[UInt8]
-    var bit_size: UInt8
+    var bit_size: Int
 
     fn __init__(inout self):
         self.data = List[UInt8]()
@@ -57,7 +57,7 @@ struct BitString:
         var width = bit.bit_width(uint)
         var res = uint << (8 - width)
         self.data = List[UInt8](res)
-        self.bit_size = width or 1
+        self.bit_size = int(width) or 1
 
     fn __copyinit__(inout self, other: Self):
         self.bit_size = other.bit_size
@@ -81,7 +81,11 @@ struct BitString:
         for i in range(width):
             var bit = (uint & (1 << (width - 1 - i))) != 0
             self.push_back(bit)
-        return None
+
+    fn push_back_uint_full(inout self, uint: UInt8) raises:
+        for i in range(8):
+            var bit = (uint & (1 << (8 - 1 - i))) != 0
+            self.push_back(bit)
 
     fn push_backc(inout self, bit: Bool) -> BitString:
         var self_copy = self
@@ -96,6 +100,17 @@ struct BitString:
         var res = self.data[byte_index] & (1 << bit_offset)
         var ret = (res != 0)
         return ret.cast[DType.uint8]()
+
+    fn get_bits(self, start: Int, length: Int) raises -> UInt8:
+        var ret: UInt8 = 0
+        if start < 0 or start + length > int(self.bit_size):
+            return ret
+        for i in range(length):
+            var bit = self.get(start + i)
+            if bit is None:
+                raise Error("BitString.get_bits: bit is None")
+            ret = (ret << 1) | bit.value()
+        return ret
 
     # TODO: SIMD this guy up
     fn __iadd__(inout self, other: Self) raises:
@@ -124,3 +139,50 @@ struct BitString:
         ret += last_item
 
         return ret
+
+
+fn encode_huffman_tree(mapping: Dict[String, BitString]) raises -> BitString:
+    var ret = BitString()
+    for item in mapping.items():
+        var char = item[].key
+        var bit_string = item[].value
+
+        # Encode the character itself
+        for c in char:
+            ret.push_back_uint_full(UInt8(ord(c)))
+
+        # Encode the length of the bit sequence
+        ret.push_back_uint_full(UInt8(bit_string.bit_size))
+
+        # Encode the bit sequence
+        for i in range(bit_string.bit_size):
+            var bit = bit_string.get(i)
+            if bit:
+                ret.push_back(bit.value() != 0)
+    return ret
+
+
+fn decode_huffman_tree(encoded: BitString) raises -> Dict[String, BitString]:
+    var mapping = Dict[String, BitString]()
+    var index = 0
+
+    while index < int(encoded.bit_size):
+        # Decode the character itself (assuming single-byte characters)
+        var char_code = encoded.get_bits(index, 8)
+        var char = chr(int(char_code))
+        index += 8
+
+        # Decode the length of the bit sequence
+        var bit_length = encoded.get_bits(index, 8)
+        index += 8
+
+        # Decode the bit sequence
+        var bit_string = BitString()
+        for _ in range(bit_length):
+            var bit = encoded.get_bits(index, 1) != 0
+            bit_string.push_back(bit)
+            index += 1
+
+        mapping[char] = bit_string
+
+    return mapping
